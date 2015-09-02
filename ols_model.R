@@ -1,0 +1,5 @@
+setwd('/Users/transferwise/LTR-forecast')
+db <- fread('Data/ready_data.csv', data.table=F)
+db[c('variable', 'value')] <- apply(db[c('variable', 'value')], 2, as.numeric)
+head(db)
+lm(log(fees)~month+corridor+channel+market)
