@@ -35,42 +35,51 @@ names(x)[ncol(x)] <- 'd_value'
 ggplot(x, aes(variable, d_value, color=attr_category_level_1))+geom_line()
 
 # Aggregate data, no grouping
-growth <- sqldf('select variable, avg(value) as value from db group by 1')
-growth$d_value <- Delt(x$value, type='log')[,1]
+growth_path <- sqldf('select variable, avg(value) as value from db group by 1')
+growth_path$d_value <- Delt(growth_path$value, type='log')
+growth_path$cum_d_value <- NA
+n <- nrow(growth_path)
+for(i in 1:n){
+  growth_path$cum_d_value[i] <- prod(exp(growth_path$d_value[i:n]))
+}
+
 ggplot(growth, aes(variable, d_value))+geom_line()
 
-users <- sample(unique(db$id_user), 1000)
+users <- sample(unique(db$id_user), 10000)
 r <- which(db$id_user %in% users)
-db_f <- db[r,]
+db_f <- db
+#db_f <- db[r,]
 #tmp <- db
 db_f <- db_f[c('id_user', 'variable', 'value')]
 db_f_act <- db_f <- dcast(db_f, id_user~variable, fun.aggregate=mean)
 
 start=2
 end=19
-db_f <- db_f[1:end]
+db_f <- db_f[1:19]
+?cast
 
-db_f$missing <- apply(db_f, 1, function(x) length(which(is.na(x))))
-db_f$last_value <- 18 - forecast$missing
-db_f[100:200,]
-db_f$g18 <- apply(db_f, 1, function(x) cumgrowth(x, growth))
-tail(db_f)
-db_f$f18 <- apply(db_f, 1, function(x) foo(x, growth))
-db_f[100:120,]
-x=db_f[300,]
+db_f$missing <- apply(db_f, 1, function(x) length(which(!is.finite(x))))
+db_f$last_value <- 18 - db_f$missing
+db_f$g18 <- apply(db_f, 1, function(x) cumgrowth(x, growth_path))
+head(db_f)
+
+x <- (db_f[100000:(100000+2),])
 x
-cumgrowth <- function(x, growth){
-  if(x[20]==18){
+cumgrowth <- function(x, growth_path){
+  if(x[21]==18){
     return(x[19])
   }
-  growth_base = x[20]
-  start = as.numeric(x[20]+1)
-  end = 18
-  pgrowth <- prod(exp(growth[start:end]))
-  return(pgrowth)
+  i_last_ltr <- (x[21])+1
+  i_growth_start <- (x[21])+1
+  growth <- growth_path$cum_d_value[i_growth_start]
+  growth_f <- x[i_last_ltr] * growth
+  return(growth_f)
 }
 
 
+db_f[280:300,-c(1:6)]
+db[200:500,]
+growth_path
 
 
 
