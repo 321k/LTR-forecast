@@ -38,6 +38,19 @@ users1 <- as.numeric(d_s1[,id_user])
 users2 <- as.numeric(d_s2[,id_user])
 users3 <- as.numeric(d_s3[,id_user])
 users4 <- as.numeric(d_s4[,id_user])
-s <- which(db$id_user %in% users3)
+s <- which(db$id_user %in% users4)
+table <- model_performance(s=s, db=db)
+write.cb(table)
+
+
+head(d)
+d_s <- d[,.N, by=.(id_user, first_ccy_target, attr_category_level_1)]
+d[,.N, by=.(first_ccy_target, attr_category_level_1)]
+d_s1 <- d[attr_category_level_1=='Virality']
+d_s1 <- d_s1[first_ccy_target=='INR']
+
+users1 <- as.numeric(d_s1[,id_user])
+
+s <- which(db$id_user %in% users1)
 table <- model_performance(s=s, db=db)
 write.cb(table)

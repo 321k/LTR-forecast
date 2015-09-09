@@ -1,4 +1,4 @@
-# Not an actual ols model
+# Not an actual ols model, legacy name
 
 setwd('/Users/transferwise/LTR-forecast')
 
@@ -13,7 +13,7 @@ library(Kmisc)
 library(foreach)
 source('functions.R')
 
-db <- db_d <- fread('Data/ready_data.csv', data.table=F, stringsAsFactors=T)
+db <- fread('Data/ready_data.csv', data.table=F, stringsAsFactors=T)
 db[,'value'] <- as.numeric(db[,'value'])
 
 # The measures variable should always be the same as in the data_munging script
@@ -50,11 +50,11 @@ db_f <- db_f[1:19] #  Remove LTR beyond 18 months
 
 db_f$missing <- apply(db_f, 1, function(x) length(which(!is.finite(x)))) #  Count number of periods to corecast
 db_f$last_value <- 18 - db_f$missing #  Row containing last actual ltr value
-
 db_f$ltr_18_month_forecast <- apply(db_f, 1, function(x) cumgrowth(x, growth_path$pred)) #  Forecast LTR
 
 write.csv(db_f, 'Data/forecast.csv')
 
+# Break the file into parts for easier upload to MySQL
 steps=100000
 counter=1
 check <- 0
