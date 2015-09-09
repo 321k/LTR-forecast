@@ -24,24 +24,8 @@ for(i in measures){
 }
 
 db$id_user <- as.numeric(as.character(db$id_user))
-
 growth_path <- sqldf('select variable, avg(value) as value from db group by 1')
 growth_path$d_value <- Delt(growth_path$value, type='log')
-
-# Unnecessary attempt at fitting a polynomial function
-x <- 1:length(growth_path$d_value)
-plot(growth_path$d_value~x)
-r <- 1:16
-y <- growth_path$d_value[r]
-x <- r
-fit <- lm(y~poly(x,2,raw=TRUE))
-xx <- 1:14
-lines(xx, predict(fit, data.frame(x=xx)), col="red")
-pred <- predict(fit, data.frame(x=xx))
-growth_path$pred <- NA
-growth_path$pred[1:length(pred)] <- pred
-growth_path$pred[which(is.na(growth_path$pred))] = min(pred)
-
 
 db_f <- db
 db_f <- db_f[c('id_user', 'variable', 'value')]
