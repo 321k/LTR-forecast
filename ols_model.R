@@ -1,3 +1,5 @@
+# Not an actual ols model
+
 setwd('/Users/transferwise/LTR-forecast')
 
 library(data.table)
@@ -23,17 +25,10 @@ for(i in measures){
 
 db$id_user <- as.numeric(as.character(db$id_user))
 
-
-### Table with month on month expected growth
-#growth_path <- sqldf('select variable, avg(value) as value, avg(d_value) as d_value from db group by 1')
-#growth_path <- sqldf('select variable, cntry_first_address, avg(value) as value from db group by 1,2')
-#growth_path <- ddply(growth_path, "cntry_first_address", transform,  DeltaCol = Delt(value, type='log'))
-#names(growth_path)[ncol(growth_path)] <- 'd_value'
-#ggplot(growth_path, aes(variable, d_value, color=first_ccy_target))+geom_line()
-
 growth_path <- sqldf('select variable, avg(value) as value from db group by 1')
 growth_path$d_value <- Delt(growth_path$value, type='log')
 
+# Unnecessary attempt at fitting a polynomial function
 x <- 1:length(growth_path$d_value)
 plot(growth_path$d_value~x)
 r <- 1:16
@@ -70,9 +65,3 @@ for(i in seq(1, nrow(db_f), by=steps)){
   counter <- counter+1
   check <- check + nrow(for_upload)
 }
-
-
-d = data.table(db)
-d <- d[,.N, by=.(id_user, attr_category_level_1)]
-d_s <- d[attr_category_level_1=='Online Performance']
-users <- as.data.frame(d_s[,id_user])

@@ -22,41 +22,6 @@ cumgrowth <- function(x, growth_path=vector(), start=(x[21]+1), end=18, adjustme
   return(growth_f)
 }
 
-
-dc.SplitUpElogForRepeatTrans <- function(elog) {
-  elog <- elog[order(elog$date),]
-  elog <- elog[order(elog$cust),]
-  
-  dc.WriteLine("Started Creating Repeat Purchases")
-  unique.custs <- unique(elog$cust)
-  
-  x <- data.table(elog)
-  x$i <- 1:nrow(elog)
-  keycols <- c('cust', 'date')
-  setkeyv(x, keycols)
-  first <- x[J(unique(cust)), mult='first']
-  first <- as.data.frame(first)
-  last <- x[J(unique(cust)), mult='last']
-  last <- as.data.frame(last)
-  
-  repeat.trans.elog <- elog[-first$i, ]
-  first.trans.data <- as.data.frame(first)
-  last.trans.data <- as.data.frame(last)
-  
-  
-  # [-1] is because we don't want to change the column name for custs
-  names(first.trans.data)[-1] <- paste("first.", names(first.trans.data)[-1], sep = "")
-  names(first.trans.data)[which(names(first.trans.data) == "first.date")] <- "birth.per"
-  names(last.trans.data) <- paste("last.", names(last.trans.data), sep = "")
-  
-  # [-1] is because we don't want to include two custs columns
-  cust.data <- data.frame(first.trans.data, last.trans.data[, -1])
-  names(cust.data) <- c(names(first.trans.data), names(last.trans.data)[-1])
-  
-  dc.WriteLine("Finished Creating Repeat Purchases")
-  return(list(repeat.trans.elog = repeat.trans.elog, cust.data = cust.data))
-}
-
 model_performance <- function(s=NULL, db, g=growth_path$d_value){
   pb <- txtProgressBar(max = 14*14)
   count <- 0
@@ -98,4 +63,39 @@ model_performance <- function(s=NULL, db, g=growth_path$d_value){
     }
   }
   return(table)
+}
+
+# Updated version of function from the BTYD package for increased speed
+dc.SplitUpElogForRepeatTrans <- function(elog) {
+  elog <- elog[order(elog$date),]
+  elog <- elog[order(elog$cust),]
+  
+  dc.WriteLine("Started Creating Repeat Purchases")
+  unique.custs <- unique(elog$cust)
+  
+  x <- data.table(elog)
+  x$i <- 1:nrow(elog)
+  keycols <- c('cust', 'date')
+  setkeyv(x, keycols)
+  first <- x[J(unique(cust)), mult='first']
+  first <- as.data.frame(first)
+  last <- x[J(unique(cust)), mult='last']
+  last <- as.data.frame(last)
+  
+  repeat.trans.elog <- elog[-first$i, ]
+  first.trans.data <- as.data.frame(first)
+  last.trans.data <- as.data.frame(last)
+  
+  
+  # [-1] is because we don't want to change the column name for custs
+  names(first.trans.data)[-1] <- paste("first.", names(first.trans.data)[-1], sep = "")
+  names(first.trans.data)[which(names(first.trans.data) == "first.date")] <- "birth.per"
+  names(last.trans.data) <- paste("last.", names(last.trans.data), sep = "")
+  
+  # [-1] is because we don't want to include two custs columns
+  cust.data <- data.frame(first.trans.data, last.trans.data[, -1])
+  names(cust.data) <- c(names(first.trans.data), names(last.trans.data)[-1])
+  
+  dc.WriteLine("Finished Creating Repeat Purchases")
+  return(list(repeat.trans.elog = repeat.trans.elog, cust.data = cust.data))
 }
