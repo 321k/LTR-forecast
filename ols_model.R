@@ -34,18 +34,30 @@ db_f <- db_f[1:19] #  Remove LTR beyond 18 months
 
 db_f$missing <- apply(db_f, 1, function(x) length(which(!is.finite(x)))) #  Count number of periods to corecast
 db_f$last_value <- 18 - db_f$missing #  Row containing last actual ltr value
+
 db_f$ltr_18_month_forecast <- apply(db_f, 1, function(x) cumgrowth(x, growth_path$pred)) #  Forecast LTR
 
+for(i in 1:18){
+  db_f[ncol(db_f)+1] <- apply(db_f, 1, function(x) cumgrowth(x, growth_path$d_value, end=i)) #  Forecast LTR
+  names(db_f)[ncol(db_f)] <- paste('ltr_', i, '_month_forecast', sep='')
+  print(i)
+}
+
 write.csv(db_f, 'Data/forecast.csv')
+
 
 # Break the file into parts for easier upload to MySQL
 steps=100000
 counter=1
 check <- 0
 for(i in seq(1, nrow(db_f), by=steps)){
-  for_upload <- (db_f[i:min(nrow(db_f),(i+steps-1)), c('id_user', 'ltr_18_month_forecast')])
+  for_upload <- (db_f[i:min(nrow(db_f),(i+steps-1)), c(1, 20, 22:39)])
   print(paste(counter, nrow(for_upload), sep=', '))
-  write.table(for_upload, paste('Data/for_upload', counter, '.csv', sep=""), sep=',', na='NULL', row.names=FALSE)
+  write.table(for_upload, paste('Data/for_upload', counter, '.csv', sep=""), sep=',', na='NULL', row.names=FALSE, col.names = FALSE)
   counter <- counter+1
   check <- check + nrow(for_upload)
 }
+names(growth_path
+
+db_f[which(db_f$missing=2)[100:200],]
+?write.table

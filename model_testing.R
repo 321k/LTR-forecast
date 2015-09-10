@@ -39,7 +39,7 @@ users2 <- as.numeric(d_s2[,id_user])
 users3 <- as.numeric(d_s3[,id_user])
 users4 <- as.numeric(d_s4[,id_user])
 s <- which(db$id_user %in% users4)
-table <- model_performance(s=s, db=db)
+table <- model_performance(db=db)
 write.cb(table)
 
 
