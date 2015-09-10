@@ -32,7 +32,7 @@ db_f <- db_f[c('id_user', 'variable', 'value')]
 db_f <- dcast(db_f, id_user~variable, fun.aggregate=mean)
 db_f <- db_f[1:19] #  Remove LTR beyond 18 months
 
-db_f$missing <- apply(db_f, 1, function(x) length(which(!is.finite(x)))) #  Count number of periods to corecast
+db_f$missing <- apply(db_f, 1, function(x) length(which(!is.finite(x)))) #  Count number of periods to forecast
 db_f$last_value <- 18 - db_f$missing #  Row containing last actual ltr value
 
 db_f$ltr_18_month_forecast <- apply(db_f, 1, function(x) cumgrowth(x, growth_path$pred)) #  Forecast LTR
